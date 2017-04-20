@@ -38,6 +38,10 @@
 
 	</body>
 	<script>
+	
+		//[Uncomment below to test on psiturk]
+		/*
+		
 		//A function to save the data to the SQL table on the psiturk server.  This gets called at the end of the file.
 		function save_data(data_table,data){
 			jsPsych.data.addProperties({stimulus: '', subject: psiturk.taskdata.get('workerId')});
@@ -54,12 +58,13 @@
 						success: function(output) { console.log(output); } // write the result to javascript console
 				});
 			}
-
+		//*/
 		var filename = "SivaTestResults.csv";
 
 		 /* load psiturk! */
-		var psiturk = new PsiTurk(uniqueId, adServerLoc, mode);
-
+		//var psiturk = new PsiTurk(uniqueId, adServerLoc, mode);
+		//[^^^Uncomment to test on psiturk]
+		
 		<!-- ---------------------------------- -->
 		//Canvas Parameters
 		var canvasWidth = window.innerWidth-50;
@@ -91,21 +96,30 @@
 		var yCoordRightStim = canvasHeightCenter-(stimRectHeight/2);
 
 		//Stimuli parameters
-		var numberOfCirclesCenterCondition1 = 8;
-		var numberOfCirclesPeripheryCondition1 = 8;
+		var numberOfCirclesCenterCondition1 = 3;
+		var numberOfCirclesPeripheryCondition1 = 3;
 
 		//Supposed to have a response in condition 2, therefore more circles in periphery
-		var numberOfCirclesCenterCondition2 = 8;
-		var numberOfCirclesPeripheryCondition2 = 9;
+		var numberOfCirclesCenterCondition2 = 11;
+		var numberOfCirclesPeripheryCondition2 = 11;
 
 		var radiusOfCircle = 15;
 		var counterLimit = 1000;
-
-
+		
+		<!-- ---------------------------------- -->
+		//COLOR PARAMETERS
+		var centerSaturation = 0.50;
+		var periSatCondition30 = 0.30; 
+		var periSatCondition40 = 0.40; 
+		var periSatCondition50 = 0.50; 
+		var periSatCondition60 = 0.60; 
+		var periSatCondition70 = 0.70; 
+		
 		<!-- ---------------------------------- -->
 
 		//Trial Parameters
-		var numberOfTrials = 10;
+		//(Per condition)
+		var numberOfTrials = 2;
 
 		//Time between the trials (in ms)
 		var minPostTrialTime = 0;
@@ -113,9 +127,24 @@
 		var stimuliPresentationTime = 1000;
 
 		<!-- -----Generate the HTML content---- -->
-		function drawCanvas(centerNum, peripheryNum){
-
-			drawRect(centerNum, peripheryNum);
+		//function to create the Question on which is more colorful.
+		function question1() {
+				cueContext.font = "bold 24px sans-serif";
+				cueContext.textAlign = "center";
+				cueContext.textBaseline = "middle";
+				cueContext.fillText("Which cloud is more colorful?", canvasWidth/2, canvasHeight/2 - 30);
+				cueContext.fillText("Press A if the center was more colorful.", canvasWidth/2, canvasHeight/2 - 0);
+				cueContext.fillText("Press L if the periphery was more colorful", canvasWidth/2, canvasHeight/2 + 30);
+				var welcometext = cueCanvas.toDataURL();
+				var text4welcome = welcometext;
+				cueContext.clearRect(0, 0, canvas.width, canvas.height);
+				return text4welcome;		
+			}
+		
+		//Function to draw canvas. Called by the stimuli objects
+		function drawCanvas(centerNum, peripheryNum, value, centerSat, periSat){
+			console.log("drawCanvas called. centerNum: " + centerNum + ", peripheryNum: " + peripheryNum + ", value: " + value + ", centerSat: " + centerSat + ", periSat: " + periSat);
+			drawRect(centerNum, peripheryNum, value, centerSat, periSat);
 
 
 			var canvasTextURL = cueCanvas.toDataURL();
@@ -123,9 +152,9 @@
 			return canvasTextURL;
 		}
 
-		//Draws the 3 rectangles
-		function drawRect(centerNum, peripheryNum){
-
+		//Draws the 3 rectangles. Called by drawCanvas function above.
+		function drawRect(centerNum, peripheryNum, value, centerSat, periSat){
+			console.log("drawRectcalled. centerNum: " + centerNum + ", peripheryNum: " + peripheryNum + ", value: " + value + ", centerSat: " + centerSat + ", periSat: " + periSat);
 			//Create an array of xCoordnates and yCoordinates that do not overlap
 			var centerArraysXY = createCoordinates(centerNum);
 			//Split the arrays up to x and y coords
@@ -139,16 +168,17 @@
 
 
 			//Periphery
-			var peripheryArraysXY = createCoordinates(peripheryNum);
+			var leftArraysXY = createCoordinates(peripheryNum);
+			var rightArraysXY = createCoordinates(peripheryNum);
 
 
 			//Left
-			var xCoordLeftArray = peripheryArraysXY[0];
-			var yCoordLeftArray = peripheryArraysXY[1];
+			var xCoordLeftArray = leftArraysXY[0];
+			var yCoordLeftArray = leftArraysXY[1];
 
 			//Right
-			var xCoordRightArray = peripheryArraysXY[0];
-			var yCoordRightArray = peripheryArraysXY[1];
+			var xCoordRightArray = rightArraysXY[0];
+			var yCoordRightArray = rightArraysXY[1];
 
 			//Left adjustment
 			xCoordLeftArray = addValueToArray(xCoordLeftArray,xCoordLeftStim);
@@ -169,15 +199,12 @@
 
 				cueContext.beginPath();
 				cueContext.arc(xCoordCircle,yCoordCircle,radiusOfCircle,0,2*Math.PI);
-				cueContext.fillStyle = generateColor();
+				cueContext.fillStyle = generateColor(Math.random()*360,centerSat,value);
 				cueContext.fill();
 			}
 
 			//For the left and right rectangles
 			for (var i = 0; i<peripheryNum; ++i){
-
-				//Set random parameters
-				var color = generateColor();
 
 				//Left
 				var xCoordCircle = xCoordLeftArray[i];
@@ -186,7 +213,7 @@
 
 				cueContext.beginPath();
 				cueContext.arc(xCoordCircle,yCoordCircle,radiusOfCircle,0,2*Math.PI);
-				cueContext.fillStyle = color;
+				cueContext.fillStyle = generateColor(Math.random()*360,periSat,value);
 				cueContext.fill();
 
 				//Right
@@ -195,7 +222,7 @@
 
 				cueContext.beginPath();
 				cueContext.arc(xCoordCircle,yCoordCircle,radiusOfCircle,0,2*Math.PI);
-				cueContext.fillStyle = color;
+				cueContext.fillStyle = generateColor(Math.random()*360,periSat,value);
 				cueContext.fill();
 			}
 
@@ -258,7 +285,8 @@
 			}
 			return newArray;
 		}
-
+		
+		/* [Delete below once the actual hsv color generator is working]
 		//Generates the color to be filled into the circle
 		function generateColor(){
 			//alert("generateColor called!");
@@ -268,31 +296,188 @@
 			var colorString = "rgba(" + r + "," + g + "," + b + ",1)";
 			return colorString;
 		}
-
+		//*/
+		
+		function generateColor(h,s,v){
+			console.log("GenerateColor called. h: " + h + ", s: " + s + ", v: " + v);
+		
+			var c = v*s;
+			var x = c*(1-( Math.abs(((h/60)%2)-1) ));
+			var m = v-c;
+			
+			//R',G', and B' are intermediate values used to calculate the actual RGB
+			var rPrime = 0;
+			var gPrime = 0;
+			var bPrime = 0;
+			
+			//R',G', and B' are dependent on hue
+			if (0<=h && h<60){
+				rPrime = c;
+				gPrime = x;
+				bPrime = 0;
+			}
+			else if (60<=h && h<120){
+				rPrime = x;
+				gPrime = c;
+				bPrime = 0;
+			}
+			else if (120<=h && h<180){
+				rPrime = 0;
+				gPrime = c;
+				bPrime = x;
+			}
+			else if (180<=h && h<240){
+				rPrime = 0;
+				gPrime = x;
+				bPrime = c;
+			}
+			else if (240<=h && h<300){
+				rPrime = x;
+				gPrime = 0;
+				bPrime = c;
+			}
+			else if (300<=h && h<360){
+				rPrime = c;
+				gPrime = 0;
+				bPrime = x;
+			}
+			else{
+				alert("Error: colorGenerator(): Hue is out of range!");
+			}
+			
+			var r = Math.floor((rPrime+m)*255);
+			var g = Math.floor((gPrime+m)*255);
+			var b = Math.floor((bPrime+m)*255);
+			
+			var colorString = "rgba(" + r + ", " + g + ", " + b + ", 1)";
+			console.log(colorString);
+			return colorString;
+			
+		}
 
 		<!-- ---------------------------------- -->
-
+		
+		var questionObject = {
+			type: 'single-stim',
+			stimulus: question1(),
+			/*data: function(){
+				var data = jsPsych.data.getLastTrialData;
+				return { 
+					response: data.response,
+					value: data.value,
+					centerSat: data.centerSat,
+					periSat: data.periSat 
+				};
+			}*/
+		};
+		
 		//Make an array of stimuli objects
 		var condition1 = [];
 		for (var i = 0; i < numberOfTrials; ++i){
-			var stimuliObject = {
-				stimulus: drawCanvas(numberOfCirclesCenterCondition1,numberOfCirclesPeripheryCondition1),
-				data:{response: '1' }
+			var theObjectsValue = Math.random();
+			var stimuliObject = {				
+				stimulus: drawCanvas(numberOfCirclesCenterCondition1,numberOfCirclesPeripheryCondition1, theObjectsValue, centerSaturation, periSatCondition30),
+				data:{
+					response: 'a',
+					value: theObjectsValue,
+					centerSat: centerSaturation,
+					periSat: periSatCondition30
+				}
 			};
 			condition1.push(stimuliObject);
 		}
 
 		var condition2 = [];
 		for (var i = 0; i < numberOfTrials; ++i){
+			var theObjectsValue = Math.random();
 			var stimuliObject = {
-				stimulus: drawCanvas(numberOfCirclesCenterCondition2,numberOfCirclesPeripheryCondition2),
-				data:{response: '2' }
+				stimulus: drawCanvas(numberOfCirclesCenterCondition2,numberOfCirclesPeripheryCondition2, theObjectsValue, centerSaturation, periSatCondition40),
+				data:{
+					response: '2',
+					value: theObjectsValue,
+					centerSat: centerSaturation,
+					periSat: periSatCondition40
+					}
 			};
 			condition2.push(stimuliObject);
 		}
-
-		var condition1_and_2 = condition1.concat(condition2);
-		var randomizedTrialArray = jsPsych.randomization.repeat(condition1_and_2, 1);
+		
+		var condition3 = [];
+		for (var i = 0; i < numberOfTrials; ++i){
+			var theObjectsValue = Math.random();
+			var stimuliObject = {
+				stimulus: drawCanvas(numberOfCirclesCenterCondition2,numberOfCirclesPeripheryCondition2, theObjectsValue, centerSaturation, periSatCondition50),
+				data:{
+					response: '2',
+					value: theObjectsValue,
+					centerSat: centerSaturation,
+					periSat: periSatCondition50
+					}
+			};
+			condition3.push(stimuliObject);
+		}
+		
+		var condition4 = [];
+		for (var i = 0; i < numberOfTrials; ++i){
+			var theObjectsValue = Math.random();
+			var stimuliObject = {
+				stimulus: drawCanvas(numberOfCirclesCenterCondition2,numberOfCirclesPeripheryCondition2, theObjectsValue, centerSaturation, periSatCondition60),
+				data:{
+					response: '2',
+					value: theObjectsValue,
+					centerSat: centerSaturation,
+					periSat: periSatCondition60
+					}
+			};
+			condition4.push(stimuliObject);
+		}
+		
+		var condition5 = [];
+		for (var i = 0; i < numberOfTrials; ++i){
+			var theObjectsValue = Math.random();
+			var stimuliObject = {
+				stimulus: drawCanvas(numberOfCirclesCenterCondition2,numberOfCirclesPeripheryCondition2, theObjectsValue, centerSaturation, periSatCondition70),
+				data:{
+					response: '2',
+					value: theObjectsValue,
+					centerSat: centerSaturation,
+					periSat: periSatCondition70
+					}
+			};
+			condition5.push(stimuliObject);
+		}
+		
+		//Push all the conditions into the allConditions array
+		var allConditions = condition1.concat(condition2,condition3,condition4,condition5);
+		
+		/*
+		allConditions.push(condition1);
+		allConditions.push(condition2);
+		allConditions.push(condition3);
+		allConditions.push(condition4);
+		allConditions.push(condition5);
+		*/
+		console.log(allConditions);
+		
+		
+		//Randomize all the conditions
+		var randomizedIntermediateTrialArray = jsPsych.randomization.repeat(allConditions, 1);
+		
+		var randomizedTrialArray  = [];
+		
+		var arrayLength = randomizedIntermediateTrialArray.length;
+		for (var i = 0; i < arrayLength; i++){
+			console.log("i is:  " + i);
+			randomizedTrialArray.push(randomizedIntermediateTrialArray[i]);
+			console.log("Object being concatenated is:  ");
+			console.log(randomizedIntermediateTrialArray[i]);
+			
+			randomizedTrialArray.push(questionObject);
+			console.log("Object being pushed is:  ");
+			console.log(questionObject);
+		}
+		
+		console.log(randomizedTrialArray);
 
 		<!-- ---------------------------------- -->
 		var welcome_block = {
@@ -311,7 +496,7 @@
 		};
 
 
-
+/* Commented out because unused.
 		<!--Array of Objects, where each object contains a stimulus as a property (changed to 2 stimuli per object)-->
 
 		var test_stimuli = [
@@ -336,7 +521,7 @@
 		var all_trials = jsPsych.randomization.repeat(test_stimuli, 2);
 
 
-
+*/
 
 
 		//How much time between the trials
@@ -348,7 +533,7 @@
 		//test-block object
 		var test_block = {
 			type: 'single-stim',
-			choices: [32],
+			choices: [32], //Commented out to delete if unnecessary.
 			//time stimuli is displayed
 			timing_response: stimuliPresentationTime,
 			//time after the trial before the next trial starts
@@ -419,8 +604,11 @@
 		jsPsych.init({
 			timeline: timeline,
 			on_trial_finish: function() {
+			//[Uncomment below to test on Psiturk]
+			/*
 				//SivaTest is the name of the table
 			 save_data('SivaTest', [jsPsych.data.getLastTrialData()]);
+			 //*/
 			 //console.log(jsPsych.data.getLastTrialData());
 			},
 			on_finish: function(){
