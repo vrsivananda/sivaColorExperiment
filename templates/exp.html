@@ -125,6 +125,10 @@
 		var minPostTrialTime = 0;
 		var maxPostTrialTime = 0;
 		var stimuliPresentationTime = 1000;
+		
+		//Key parameters
+		var peripheryKey = 'A';
+		var centerKey = 'L';
 
 		<!-- -----Generate the HTML content---- -->
 		//function to create the Question on which is more colorful.
@@ -132,9 +136,10 @@
 				cueContext.font = "bold 24px sans-serif";
 				cueContext.textAlign = "center";
 				cueContext.textBaseline = "middle";
-				cueContext.fillText("Which cloud is more colorful?", canvasWidth/2, canvasHeight/2 - 30);
-				cueContext.fillText("Press A if the center was more colorful.", canvasWidth/2, canvasHeight/2 - 0);
-				cueContext.fillText("Press L if the periphery was more colorful", canvasWidth/2, canvasHeight/2 + 30);
+				cueContext.fillStyle = "black";
+				cueContext.fillText("Which cloud is more colorful?", canvasWidth/2, canvasHeight/2 - 40);
+				cueContext.fillText("Press " + centerKey + " if the center was more colorful.", canvasWidth/2, canvasHeight/2 - 0);
+				cueContext.fillText("Press " + peripheryKey + " if the periphery was more colorful", canvasWidth/2, canvasHeight/2 + 40);
 				var welcometext = cueCanvas.toDataURL();
 				var text4welcome = welcometext;
 				cueContext.clearRect(0, 0, canvas.width, canvas.height);
@@ -357,26 +362,31 @@
 
 		<!-- ---------------------------------- -->
 		
-		var questionObject = {
+		/*var questionObject = {
 			type: 'single-stim',
 			stimulus: question1(),
-			/*data: function(){
-				var data = jsPsych.data.getLastTrialData;
-				return { 
-					response: data.response,
-					value: data.value,
-					centerSat: data.centerSat,
-					periSat: data.periSat 
-				};
-			}*/
-		};
+			choices: ['a', 'l'],
+			data: function(){
+					console.log("data: function() in questionObject is called");
+					var data = jsPsych.data.getLastTrialData; //So this is "last trial" is probably this trial itself
+					return { //All this data stuff not working.(not showing up in final results)
+						response: data.response,
+						value: data.value,
+						centerSat: data.centerSat,
+						periSat: data.periSat,
+						stimuli: data.stimuli 
+					};
+				}
+		};*/
 		
 		//Make an array of stimuli objects
 		var condition1 = [];
 		for (var i = 0; i < numberOfTrials; ++i){
 			var theObjectsValue = Math.random();
 			var stimuliObject = {				
-				stimulus: drawCanvas(numberOfCirclesCenterCondition1,numberOfCirclesPeripheryCondition1, theObjectsValue, centerSaturation, periSatCondition30),
+				timeline: [
+					{stimulus: drawCanvas(numberOfCirclesCenterCondition1,numberOfCirclesPeripheryCondition1, theObjectsValue, centerSaturation, periSatCondition30), timing_response: stimuliPresentationTime},
+					{stimulus: question1(), choices: [centerKey, peripheryKey]}],
 				data:{
 					response: 'a',
 					value: theObjectsValue,
@@ -390,8 +400,10 @@
 		var condition2 = [];
 		for (var i = 0; i < numberOfTrials; ++i){
 			var theObjectsValue = Math.random();
-			var stimuliObject = {
-				stimulus: drawCanvas(numberOfCirclesCenterCondition2,numberOfCirclesPeripheryCondition2, theObjectsValue, centerSaturation, periSatCondition40),
+			var stimuliObject = {				
+				timeline: [
+					{stimulus: drawCanvas(numberOfCirclesCenterCondition1,numberOfCirclesPeripheryCondition1, theObjectsValue, centerSaturation, periSatCondition30), timing_response: stimuliPresentationTime},
+					{stimulus: question1(), choices: [centerKey, peripheryKey]}],
 				data:{
 					response: '2',
 					value: theObjectsValue,
@@ -405,8 +417,10 @@
 		var condition3 = [];
 		for (var i = 0; i < numberOfTrials; ++i){
 			var theObjectsValue = Math.random();
-			var stimuliObject = {
-				stimulus: drawCanvas(numberOfCirclesCenterCondition2,numberOfCirclesPeripheryCondition2, theObjectsValue, centerSaturation, periSatCondition50),
+			var stimuliObject = {				
+				timeline: [
+					{stimulus: drawCanvas(numberOfCirclesCenterCondition1,numberOfCirclesPeripheryCondition1, theObjectsValue, centerSaturation, periSatCondition30), timing_response: stimuliPresentationTime},
+					{stimulus: question1(), choices: [centerKey, peripheryKey]}],
 				data:{
 					response: '2',
 					value: theObjectsValue,
@@ -420,8 +434,10 @@
 		var condition4 = [];
 		for (var i = 0; i < numberOfTrials; ++i){
 			var theObjectsValue = Math.random();
-			var stimuliObject = {
-				stimulus: drawCanvas(numberOfCirclesCenterCondition2,numberOfCirclesPeripheryCondition2, theObjectsValue, centerSaturation, periSatCondition60),
+			var stimuliObject = {				
+				timeline: [
+					{stimulus: drawCanvas(numberOfCirclesCenterCondition1,numberOfCirclesPeripheryCondition1, theObjectsValue, centerSaturation, periSatCondition30), timing_response: stimuliPresentationTime},
+					{stimulus: question1(), choices: [centerKey, peripheryKey]}],
 				data:{
 					response: '2',
 					value: theObjectsValue,
@@ -435,8 +451,10 @@
 		var condition5 = [];
 		for (var i = 0; i < numberOfTrials; ++i){
 			var theObjectsValue = Math.random();
-			var stimuliObject = {
-				stimulus: drawCanvas(numberOfCirclesCenterCondition2,numberOfCirclesPeripheryCondition2, theObjectsValue, centerSaturation, periSatCondition70),
+			var stimuliObject = {				
+				timeline: [
+					{stimulus: drawCanvas(numberOfCirclesCenterCondition1,numberOfCirclesPeripheryCondition1, theObjectsValue, centerSaturation, periSatCondition30), timing_response: stimuliPresentationTime},
+					{stimulus: question1(), choices: [centerKey, peripheryKey]}],
 				data:{
 					response: '2',
 					value: theObjectsValue,
@@ -450,13 +468,6 @@
 		//Push all the conditions into the allConditions array
 		var allConditions = condition1.concat(condition2,condition3,condition4,condition5);
 		
-		/*
-		allConditions.push(condition1);
-		allConditions.push(condition2);
-		allConditions.push(condition3);
-		allConditions.push(condition4);
-		allConditions.push(condition5);
-		*/
 		console.log(allConditions);
 		
 		
@@ -471,10 +482,10 @@
 			randomizedTrialArray.push(randomizedIntermediateTrialArray[i]);
 			console.log("Object being concatenated is:  ");
 			console.log(randomizedIntermediateTrialArray[i]);
-			
+		/*	
 			randomizedTrialArray.push(questionObject);
 			console.log("Object being pushed is:  ");
-			console.log(questionObject);
+			console.log(questionObject);*/
 		}
 		
 		console.log(randomizedTrialArray);
@@ -495,50 +506,47 @@
 			timing_post_trial: 100
 		};
 
-
-/* Commented out because unused.
-		<!--Array of Objects, where each object contains a stimulus as a property (changed to 2 stimuli per object)-->
-
-		var test_stimuli = [
-			{
-
-				//the stimulus to be presented
-				stimulus: drawCanvas(),
-
-				//The correct response
-				data: {response: 'go'},
-				//Set to true if it is html
-				//html: true
-			},
-			{
-
-				stimulus: ['img/orange.png'],
-				data: {response: 'no-go'}
-			}
-		];
-
-		// array(?) of the trials, randomly repeated
-		var all_trials = jsPsych.randomization.repeat(test_stimuli, 2);
-
-
-*/
-
-
 		//How much time between the trials
 		//In a function so that it can be used again and again
 		var post_trial_gap = function(){
 			return Math.floor(Math.random() *(maxPostTrialTime-minPostTrialTime)) + minPostTrialTime;
 		}
+		
+		//Declare counter variables
+		var counter30 = 0;
+		var counter40 = 0;
+		var counter50 = 0;
+		var counter60 = 0;
+		var counter70 = 0;
 
 		//test-block object
 		var test_block = {
 			type: 'single-stim',
-			choices: [32], //Commented out to delete if unnecessary.
-			//time stimuli is displayed
-			timing_response: stimuliPresentationTime,
 			//time after the trial before the next trial starts
 			timing_post_trial: post_trial_gap,
-			//after trial has finished, add data on whether response was correct or incorrect
+			//after trial has finished, check what portion did the subject choose peri>center and in what condition
+			//Increment the counter in the appropriate condition
+			on_finish: function(data){
+				if(data.periSat == periSatCondition30 && data.key_press == peripheryKey.charCodeAt(0)){
+					counter30++;
+				}
+				else if (data.periSat == periSatCondition40 && data.key_press == peripheryKey.charCodeAt(0)){
+					counter40++;
+				}
+				else if (data.periSat == periSatCondition50 && data.key_press == peripheryKey.charCodeAt(0)){
+					counter50++;
+				}
+				else if (data.periSat == periSatCondition60 && data.key_press == peripheryKey.charCodeAt(0)){
+					counter60++;
+				}
+				else if (data.periSat == periSatCondition70 && data.key_press == peripheryKey.charCodeAt(0)){
+					counter70++;
+				}
+				else{
+					console.log("no key_press, probably.");
+				}
+			},
+			/* [Delete if unneeded for reference]
 			on_finish: function(data){
 				var correct = false;
 				if (data.response == '2' && data.rt > -1){
@@ -550,6 +558,7 @@
 				//Add data to the data object on whether response was correct
 				jsPsych.data.addDataToLastTrial({correct: correct});
 			},
+			*/
 			//timeline for object is the randomized array of trials
 			//timeline: all_trials
 			timeline: randomizedTrialArray
@@ -585,12 +594,29 @@
 			type: "text",
 			//Seems to be an inline function
 			text: function(){
+				console.log("debrief_block function called.");
+				
+				var percent30 = counter30/numberOfTrials;
+				var percent40 = counter40/numberOfTrials;
+				var percent50 = counter50/numberOfTrials;
+				var percent60 = counter60/numberOfTrials;
+				var percent70 = counter70/numberOfTrials;
+				console.log("percent30 is " + percent30);
+				
+				return "<p> Percent Peri>Center for Condition30: " + percent30*100 + "%. </p>" +
+					"<p> Percent Peri>Center for Condition40: " + percent40*100 + "%. </p>" +
+					"<p> Percent Peri>Center for Condition50: " + percent50*100 + "%. </p>" +
+					"<p> Percent Peri>Center for Condition60: " + percent60*100 + "%. </p>" +
+					"<p> Percent Peri>Center for Condition70: " + percent70*100 + "%. </p>" ;
+				
+			}			
+				/*function(){
 				var subject_data = getSubjectData();
 				return "<p> You responded correctly on " + subject_data.accuracy +
 				"% of the trials. </p> <p> Your average response time was <strong>" +
 				subject_data.rt + "ms </strong>. Press any key to complete the experiment"
 				+ ". Thank you! </p>";
-			}
+			}*/
 		};
 
 		//Push into the timeline array
