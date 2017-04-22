@@ -6,6 +6,7 @@
 		<script src = "../static/jspsych-5.0.3/plugins/jspsych-text.js"></script>
 		<script src = "../static/jspsych-5.0.3/plugins/jspsych-single-stim.js"> </script>
 		<script src = "../static/jspsych-5.0.3/plugins/jspsych-html.js"> </script>
+		<script src = "../static/jspsych-5.0.3/plugins/jspsych-survey-text.js"> </script>
 
 		<script src="../static/lib/jquery-min.js" type="text/javascript"> </script>
 		<script src="../static/lib/underscore-min.js" type="text/javascript"> </script>
@@ -80,9 +81,30 @@
 		cueContext.canvas.height = canvasHeight;
 
 		//Stimuli block parameters
-		var stimRectWidth = 200;
-		var stimRectHeight = 200;
-		var gapBetweenStim = 200;
+		var angleForPeriphery = 5; //In degrees
+		var stimRectWidth = 100;
+		var stimRectHeight = 100;
+		var gapBetweenStim = 0; //This will change based on the question below.
+		
+		//Question to ask for distance from subject's eyes to screen
+		var distanceFromScreen = 0;
+		while (distanceFromScreen <5 || distanceFromScreen >20){
+			distanceFromScreen = prompt("How far are you from the screen? Please answer in inches. (Make sure that your eyes are at a distance of 10 to 20 inches from the screen.)");
+		}
+		
+		//Calculating the placement of the squares
+		//y here is the distance between the center of the center cloud and the center of the periphery cloud
+		//5 degrees is converted to radians to be used with Math.tan() function
+		var y = distanceFromScreen * Math.tan(angleForPeriphery * Math.PI / 180);
+		alert("y is " + y);
+		//1 inch  = 96 px, or 1cm = 37.8px
+		//convert y to pixels
+		y*=96;
+		//calculate new gap with the new y in pixels
+		gapBetweenStim = y-stimRectWidth;
+			
+		
+		
 
 		//Starting points of stimuli rectagles (top-left corner coordinates)
 		//Left stimuli
@@ -131,6 +153,7 @@
 		var centerKey = 'L';
 
 		<!-- -----Generate the HTML content---- -->
+		
 		//function to create the Question on which is more colorful.
 		function question1() {
 				cueContext.font = "bold 24px sans-serif";
@@ -388,7 +411,6 @@
 					{stimulus: drawCanvas(numberOfCirclesCenterCondition1,numberOfCirclesPeripheryCondition1, theObjectsValue, centerSaturation, periSatCondition30), timing_response: stimuliPresentationTime},
 					{stimulus: question1(), choices: [centerKey, peripheryKey]}],
 				data:{
-					response: 'a',
 					value: theObjectsValue,
 					centerSat: centerSaturation,
 					periSat: periSatCondition30
@@ -405,7 +427,6 @@
 					{stimulus: drawCanvas(numberOfCirclesCenterCondition1,numberOfCirclesPeripheryCondition1, theObjectsValue, centerSaturation, periSatCondition30), timing_response: stimuliPresentationTime},
 					{stimulus: question1(), choices: [centerKey, peripheryKey]}],
 				data:{
-					response: '2',
 					value: theObjectsValue,
 					centerSat: centerSaturation,
 					periSat: periSatCondition40
@@ -422,7 +443,6 @@
 					{stimulus: drawCanvas(numberOfCirclesCenterCondition1,numberOfCirclesPeripheryCondition1, theObjectsValue, centerSaturation, periSatCondition30), timing_response: stimuliPresentationTime},
 					{stimulus: question1(), choices: [centerKey, peripheryKey]}],
 				data:{
-					response: '2',
 					value: theObjectsValue,
 					centerSat: centerSaturation,
 					periSat: periSatCondition50
@@ -439,7 +459,6 @@
 					{stimulus: drawCanvas(numberOfCirclesCenterCondition1,numberOfCirclesPeripheryCondition1, theObjectsValue, centerSaturation, periSatCondition30), timing_response: stimuliPresentationTime},
 					{stimulus: question1(), choices: [centerKey, peripheryKey]}],
 				data:{
-					response: '2',
 					value: theObjectsValue,
 					centerSat: centerSaturation,
 					periSat: periSatCondition60
@@ -456,7 +475,6 @@
 					{stimulus: drawCanvas(numberOfCirclesCenterCondition1,numberOfCirclesPeripheryCondition1, theObjectsValue, centerSaturation, periSatCondition30), timing_response: stimuliPresentationTime},
 					{stimulus: question1(), choices: [centerKey, peripheryKey]}],
 				data:{
-					response: '2',
 					value: theObjectsValue,
 					centerSat: centerSaturation,
 					periSat: periSatCondition70
@@ -478,14 +496,7 @@
 		
 		var arrayLength = randomizedIntermediateTrialArray.length;
 		for (var i = 0; i < arrayLength; i++){
-			console.log("i is:  " + i);
 			randomizedTrialArray.push(randomizedIntermediateTrialArray[i]);
-			console.log("Object being concatenated is:  ");
-			console.log(randomizedIntermediateTrialArray[i]);
-		/*	
-			randomizedTrialArray.push(questionObject);
-			console.log("Object being pushed is:  ");
-			console.log(questionObject);*/
 		}
 		
 		console.log(randomizedTrialArray);
@@ -505,7 +516,17 @@
 			" Do nothing otherwise. </p>",
 			timing_post_trial: 100
 		};
-
+		
+		var screenQuestion_block = {
+			type: "survey-text",
+			questions: ["What is the distance from the screen to your eyes? (in inches)"],
+			rows: 1,
+			columns: 2,
+			on_finish: function(){
+			
+			}
+		}
+		
 		//How much time between the trials
 		//In a function so that it can be used again and again
 		var post_trial_gap = function(){
@@ -522,9 +543,11 @@
 		//test-block object
 		var test_block = {
 			type: 'single-stim',
+			
 			//time after the trial before the next trial starts
 			timing_post_trial: post_trial_gap,
-			//after trial has finished, check what portion did the subject choose peri>center and in what condition
+			
+			//After each trial has finished, check what portion did the subject choose peri>center and in what condition
 			//Increment the counter in the appropriate condition
 			on_finish: function(data){
 				if(data.periSat == periSatCondition30 && data.key_press == peripheryKey.charCodeAt(0)){
@@ -623,6 +646,8 @@
 		var timeline = [];
 		timeline.push(welcome_block); <!-- This is push and not pushback -->
 		timeline.push(instructions_block);
+		//Might not be necessary anymore if we ask the screen question with a prompt from the browser
+		//timeline.push(screenQuestion_block);
 		timeline.push(test_block);
 		timeline.push(debrief_block);
 
