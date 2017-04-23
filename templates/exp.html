@@ -82,8 +82,8 @@
 
 		//Stimuli block parameters
 		var angleForPeriphery = 5; //In degrees
-		var stimRectWidth = 100;
-		var stimRectHeight = 100;
+		var stimRectWidth = 50;
+		var stimRectHeight = 50;
 		var gapBetweenStim = 0; //This will change based on the question below.
 		
 		//Question to ask for distance from subject's eyes to screen
@@ -99,11 +99,9 @@
 		alert("y is " + y);
 		//1 inch  = 96 px, or 1cm = 37.8px
 		//convert y to pixels
-		y*=96;
+		y*=138;
 		//calculate new gap with the new y in pixels
 		gapBetweenStim = y-stimRectWidth;
-			
-		
 		
 
 		//Starting points of stimuli rectagles (top-left corner coordinates)
@@ -118,14 +116,17 @@
 		var yCoordRightStim = canvasHeightCenter-(stimRectHeight/2);
 
 		//Stimuli parameters
-		var numberOfCirclesCenterCondition1 = 3;
-		var numberOfCirclesPeripheryCondition1 = 3;
-
+		var numberOfCirclesCenterCondition1 = 50;
+		var numberOfCirclesPeripheryCondition1 = 50;
+		
+		/* Probably not needed, can delete to be less confusing
 		//Supposed to have a response in condition 2, therefore more circles in periphery
 		var numberOfCirclesCenterCondition2 = 11;
 		var numberOfCirclesPeripheryCondition2 = 11;
-
-		var radiusOfCircle = 15;
+		*/
+		
+		var radiusOfCircle = 4;
+		var overlapFactor = 0.7; //0 to 1, where 1 is no overlap at all, and 0 is purely random
 		var counterLimit = 1000;
 		
 		<!-- ---------------------------------- -->
@@ -137,20 +138,23 @@
 		var periSatCondition60 = 0.60; 
 		var periSatCondition70 = 0.70; 
 		
+		var valueLowerBound = 0.3;
+		var valueUpperBound = 1.0;
+		
 		<!-- ---------------------------------- -->
 
 		//Trial Parameters
 		//(Per condition)
-		var numberOfTrials = 2;
+		var numberOfTrials = 20;
 
 		//Time between the trials (in ms)
 		var minPostTrialTime = 0;
 		var maxPostTrialTime = 0;
-		var stimuliPresentationTime = 1000;
+		var stimuliPresentationTime = 500;
 		
 		//Key parameters
-		var peripheryKey = 'A';
-		var centerKey = 'L';
+		var peripheryKey = 'P';
+		var centerKey = 'C';
 
 		<!-- -----Generate the HTML content---- -->
 		
@@ -171,7 +175,7 @@
 		
 		//Function to draw canvas. Called by the stimuli objects
 		function drawCanvas(centerNum, peripheryNum, value, centerSat, periSat){
-			console.log("drawCanvas called. centerNum: " + centerNum + ", peripheryNum: " + peripheryNum + ", value: " + value + ", centerSat: " + centerSat + ", periSat: " + periSat);
+			//console.log("drawCanvas called. centerNum: " + centerNum + ", peripheryNum: " + peripheryNum + ", value: " + value + ", centerSat: " + centerSat + ", periSat: " + periSat);
 			drawRect(centerNum, peripheryNum, value, centerSat, periSat);
 
 
@@ -182,7 +186,7 @@
 
 		//Draws the 3 rectangles. Called by drawCanvas function above.
 		function drawRect(centerNum, peripheryNum, value, centerSat, periSat){
-			console.log("drawRectcalled. centerNum: " + centerNum + ", peripheryNum: " + peripheryNum + ", value: " + value + ", centerSat: " + centerSat + ", periSat: " + periSat);
+			//console.log("drawRectcalled. centerNum: " + centerNum + ", peripheryNum: " + peripheryNum + ", value: " + value + ", centerSat: " + centerSat + ", periSat: " + periSat);
 			//Create an array of xCoordnates and yCoordinates that do not overlap
 			var centerArraysXY = createCoordinates(centerNum);
 			//Split the arrays up to x and y coords
@@ -278,13 +282,13 @@
 					var counter = 0;
 
 					//While they are too close together, generate another number.
-					while( (Math.abs(xCoordArray[j] - xCoordCurrent)<(radiusOfCircle*2)) && (Math.abs(yCoordArray[j] - yCoordCurrent)<(radiusOfCircle*2)) ){
+					while( (Math.abs(xCoordArray[j] - xCoordCurrent)<(radiusOfCircle*2*overlapFactor)) && (Math.abs(yCoordArray[j] - yCoordCurrent)<(radiusOfCircle*2*overlapFactor)) ){
 						xCoordCurrent = Math.floor(Math.random()*stimRectWidth);
 						yCoordCurrent = Math.floor(Math.random()*stimRectHeight);
 
 						++counter;
 						console.log("counter: " + counter);
-						console.log("Iteration number i: " + i);
+						//console.log("Iteration number i: " + i);
 
 						//reset j so that it compares with the array starting from the beginning
 						j = 0;
@@ -327,7 +331,7 @@
 		//*/
 		
 		function generateColor(h,s,v){
-			console.log("GenerateColor called. h: " + h + ", s: " + s + ", v: " + v);
+			//console.log("GenerateColor called. h: " + h + ", s: " + s + ", v: " + v);
 		
 			var c = v*s;
 			var x = c*(1-( Math.abs(((h/60)%2)-1) ));
@@ -378,7 +382,7 @@
 			var b = Math.floor((bPrime+m)*255);
 			
 			var colorString = "rgba(" + r + ", " + g + ", " + b + ", 1)";
-			console.log(colorString);
+			//console.log(colorString);
 			return colorString;
 			
 		}
@@ -405,7 +409,7 @@
 		//Make an array of stimuli objects
 		var condition1 = [];
 		for (var i = 0; i < numberOfTrials; ++i){
-			var theObjectsValue = Math.random();
+			var theObjectsValue = Math.random()*(valueUpperBound-valueLowerBound)+valueLowerBound;
 			var stimuliObject = {				
 				timeline: [
 					{stimulus: drawCanvas(numberOfCirclesCenterCondition1,numberOfCirclesPeripheryCondition1, theObjectsValue, centerSaturation, periSatCondition30), timing_response: stimuliPresentationTime},
@@ -421,10 +425,10 @@
 
 		var condition2 = [];
 		for (var i = 0; i < numberOfTrials; ++i){
-			var theObjectsValue = Math.random();
+			var theObjectsValue = Math.random()*(valueUpperBound-valueLowerBound)+valueLowerBound;
 			var stimuliObject = {				
 				timeline: [
-					{stimulus: drawCanvas(numberOfCirclesCenterCondition1,numberOfCirclesPeripheryCondition1, theObjectsValue, centerSaturation, periSatCondition30), timing_response: stimuliPresentationTime},
+					{stimulus: drawCanvas(numberOfCirclesCenterCondition1,numberOfCirclesPeripheryCondition1, theObjectsValue, centerSaturation, periSatCondition40), timing_response: stimuliPresentationTime},
 					{stimulus: question1(), choices: [centerKey, peripheryKey]}],
 				data:{
 					value: theObjectsValue,
@@ -437,10 +441,10 @@
 		
 		var condition3 = [];
 		for (var i = 0; i < numberOfTrials; ++i){
-			var theObjectsValue = Math.random();
+			var theObjectsValue = Math.random()*(valueUpperBound-valueLowerBound)+valueLowerBound;
 			var stimuliObject = {				
 				timeline: [
-					{stimulus: drawCanvas(numberOfCirclesCenterCondition1,numberOfCirclesPeripheryCondition1, theObjectsValue, centerSaturation, periSatCondition30), timing_response: stimuliPresentationTime},
+					{stimulus: drawCanvas(numberOfCirclesCenterCondition1,numberOfCirclesPeripheryCondition1, theObjectsValue, centerSaturation, periSatCondition50), timing_response: stimuliPresentationTime},
 					{stimulus: question1(), choices: [centerKey, peripheryKey]}],
 				data:{
 					value: theObjectsValue,
@@ -453,10 +457,10 @@
 		
 		var condition4 = [];
 		for (var i = 0; i < numberOfTrials; ++i){
-			var theObjectsValue = Math.random();
+			var theObjectsValue = Math.random()*(valueUpperBound-valueLowerBound)+valueLowerBound;
 			var stimuliObject = {				
 				timeline: [
-					{stimulus: drawCanvas(numberOfCirclesCenterCondition1,numberOfCirclesPeripheryCondition1, theObjectsValue, centerSaturation, periSatCondition30), timing_response: stimuliPresentationTime},
+					{stimulus: drawCanvas(numberOfCirclesCenterCondition1,numberOfCirclesPeripheryCondition1, theObjectsValue, centerSaturation, periSatCondition60), timing_response: stimuliPresentationTime},
 					{stimulus: question1(), choices: [centerKey, peripheryKey]}],
 				data:{
 					value: theObjectsValue,
@@ -469,10 +473,10 @@
 		
 		var condition5 = [];
 		for (var i = 0; i < numberOfTrials; ++i){
-			var theObjectsValue = Math.random();
+			var theObjectsValue = Math.random()*(valueUpperBound-valueLowerBound)+valueLowerBound;
 			var stimuliObject = {				
 				timeline: [
-					{stimulus: drawCanvas(numberOfCirclesCenterCondition1,numberOfCirclesPeripheryCondition1, theObjectsValue, centerSaturation, periSatCondition30), timing_response: stimuliPresentationTime},
+					{stimulus: drawCanvas(numberOfCirclesCenterCondition1,numberOfCirclesPeripheryCondition1, theObjectsValue, centerSaturation, periSatCondition70), timing_response: stimuliPresentationTime},
 					{stimulus: question1(), choices: [centerKey, peripheryKey]}],
 				data:{
 					value: theObjectsValue,
@@ -486,7 +490,7 @@
 		//Push all the conditions into the allConditions array
 		var allConditions = condition1.concat(condition2,condition3,condition4,condition5);
 		
-		console.log(allConditions);
+		//console.log(allConditions);
 		
 		
 		//Randomize all the conditions
@@ -499,7 +503,7 @@
 			randomizedTrialArray.push(randomizedIntermediateTrialArray[i]);
 		}
 		
-		console.log(randomizedTrialArray);
+		//console.log(randomizedTrialArray);
 
 		<!-- ---------------------------------- -->
 		var welcome_block = {
@@ -617,14 +621,12 @@
 			type: "text",
 			//Seems to be an inline function
 			text: function(){
-				console.log("debrief_block function called.");
 				
 				var percent30 = counter30/numberOfTrials;
 				var percent40 = counter40/numberOfTrials;
 				var percent50 = counter50/numberOfTrials;
 				var percent60 = counter60/numberOfTrials;
 				var percent70 = counter70/numberOfTrials;
-				console.log("percent30 is " + percent30);
 				
 				return "<p> Percent Peri>Center for Condition30: " + percent30*100 + "%. </p>" +
 					"<p> Percent Peri>Center for Condition40: " + percent40*100 + "%. </p>" +
