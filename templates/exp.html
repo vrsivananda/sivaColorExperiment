@@ -81,7 +81,7 @@
 		cueContext.canvas.height = canvasHeight;
 
 		//Stimuli block parameters
-		var angleForPeriphery = 5; //In degrees
+		var angleForPeriphery = 10; //In degrees
 		var stimRectWidth = 50;
 		var stimRectHeight = 50;
 		var gapBetweenStim = 0; //This will change based on the question below.
@@ -92,11 +92,19 @@
 			distanceFromScreen = prompt("How far are you from the screen? Please answer in inches. (Make sure that your eyes are at a distance of 10 to 20 inches from the screen.)");
 		}
 		
+		//================================EXPERIMENTAL dpi calculator====================================
+		//--BEGIN--
+		var hashRegex = /^#(\d+)[x×](\d+)(@(\d*\.?\d+)["″])?|(\d*\.?\d+)["″]$/;
+		var dppx = window.devicePixelRatio;
+		//alert("dppx is: " + dppx);	
+		
+		//--END--
+		
 		//Calculating the placement of the squares
 		//y here is the distance between the center of the center cloud and the center of the periphery cloud
 		//5 degrees is converted to radians to be used with Math.tan() function
 		var y = distanceFromScreen * Math.tan(angleForPeriphery * Math.PI / 180);
-		alert("y is " + y);
+		//alert("y is " + y);
 		//1 inch  = 96 px, or 1cm = 37.8px
 		//convert y to pixels
 		y*=138;
@@ -116,8 +124,8 @@
 		var yCoordRightStim = canvasHeightCenter-(stimRectHeight/2);
 
 		//Stimuli parameters
-		var numberOfCirclesCenterCondition1 = 50;
-		var numberOfCirclesPeripheryCondition1 = 50;
+		var numberOfCirclesCenterCondition1 = 30;
+		var numberOfCirclesPeripheryCondition1 = 30;
 		
 		/* Probably not needed, can delete to be less confusing
 		//Supposed to have a response in condition 2, therefore more circles in periphery
@@ -125,7 +133,7 @@
 		var numberOfCirclesPeripheryCondition2 = 11;
 		*/
 		
-		var radiusOfCircle = 4;
+		var radiusOfCircle = 5;
 		var overlapFactor = 0.7; //0 to 1, where 1 is no overlap at all, and 0 is purely random
 		var counterLimit = 1000;
 		
@@ -138,19 +146,22 @@
 		var periSatCondition60 = 0.60; 
 		var periSatCondition70 = 0.70; 
 		
-		var valueLowerBound = 0.3;
-		var valueUpperBound = 1.0;
+		var theObjectsValue = 1.0;
+		
+		//Unnecessary unless we change values per trial
+		//var valueLowerBound = 0.3;
+		//var valueUpperBound = 1.0;
 		
 		<!-- ---------------------------------- -->
 
 		//Trial Parameters
 		//(Per condition)
-		var numberOfTrials = 20;
+		var numberOfTrials = 40;
 
 		//Time between the trials (in ms)
 		var minPostTrialTime = 0;
 		var maxPostTrialTime = 0;
-		var stimuliPresentationTime = 500;
+		var stimuliPresentationTime = 100;
 		
 		//Key parameters
 		var peripheryKey = 'P';
@@ -389,27 +400,10 @@
 
 		<!-- ---------------------------------- -->
 		
-		/*var questionObject = {
-			type: 'single-stim',
-			stimulus: question1(),
-			choices: ['a', 'l'],
-			data: function(){
-					console.log("data: function() in questionObject is called");
-					var data = jsPsych.data.getLastTrialData; //So this is "last trial" is probably this trial itself
-					return { //All this data stuff not working.(not showing up in final results)
-						response: data.response,
-						value: data.value,
-						centerSat: data.centerSat,
-						periSat: data.periSat,
-						stimuli: data.stimuli 
-					};
-				}
-		};*/
-		
 		//Make an array of stimuli objects
 		var condition1 = [];
 		for (var i = 0; i < numberOfTrials; ++i){
-			var theObjectsValue = Math.random()*(valueUpperBound-valueLowerBound)+valueLowerBound;
+			//var theObjectsValue = Math.random()*(valueUpperBound-valueLowerBound)+valueLowerBound;
 			var stimuliObject = {				
 				timeline: [
 					{stimulus: drawCanvas(numberOfCirclesCenterCondition1,numberOfCirclesPeripheryCondition1, theObjectsValue, centerSaturation, periSatCondition30), timing_response: stimuliPresentationTime},
@@ -425,7 +419,7 @@
 
 		var condition2 = [];
 		for (var i = 0; i < numberOfTrials; ++i){
-			var theObjectsValue = Math.random()*(valueUpperBound-valueLowerBound)+valueLowerBound;
+			//var theObjectsValue = Math.random()*(valueUpperBound-valueLowerBound)+valueLowerBound;
 			var stimuliObject = {				
 				timeline: [
 					{stimulus: drawCanvas(numberOfCirclesCenterCondition1,numberOfCirclesPeripheryCondition1, theObjectsValue, centerSaturation, periSatCondition40), timing_response: stimuliPresentationTime},
@@ -441,7 +435,7 @@
 		
 		var condition3 = [];
 		for (var i = 0; i < numberOfTrials; ++i){
-			var theObjectsValue = Math.random()*(valueUpperBound-valueLowerBound)+valueLowerBound;
+			//var theObjectsValue = Math.random()*(valueUpperBound-valueLowerBound)+valueLowerBound;
 			var stimuliObject = {				
 				timeline: [
 					{stimulus: drawCanvas(numberOfCirclesCenterCondition1,numberOfCirclesPeripheryCondition1, theObjectsValue, centerSaturation, periSatCondition50), timing_response: stimuliPresentationTime},
@@ -457,7 +451,7 @@
 		
 		var condition4 = [];
 		for (var i = 0; i < numberOfTrials; ++i){
-			var theObjectsValue = Math.random()*(valueUpperBound-valueLowerBound)+valueLowerBound;
+			//var theObjectsValue = Math.random()*(valueUpperBound-valueLowerBound)+valueLowerBound;
 			var stimuliObject = {				
 				timeline: [
 					{stimulus: drawCanvas(numberOfCirclesCenterCondition1,numberOfCirclesPeripheryCondition1, theObjectsValue, centerSaturation, periSatCondition60), timing_response: stimuliPresentationTime},
@@ -473,7 +467,7 @@
 		
 		var condition5 = [];
 		for (var i = 0; i < numberOfTrials; ++i){
-			var theObjectsValue = Math.random()*(valueUpperBound-valueLowerBound)+valueLowerBound;
+			//var theObjectsValue = Math.random()*(valueUpperBound-valueLowerBound)+valueLowerBound;
 			var stimuliObject = {				
 				timeline: [
 					{stimulus: drawCanvas(numberOfCirclesCenterCondition1,numberOfCirclesPeripheryCondition1, theObjectsValue, centerSaturation, periSatCondition70), timing_response: stimuliPresentationTime},
