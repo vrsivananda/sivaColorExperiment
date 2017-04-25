@@ -41,32 +41,35 @@
 
 	</body>
 	<script>
-	
-		//[Uncomment below to test on psiturk]
-		//*
+		var psiTurkIsOn = true;
+		var savingLocally = false;
 		
-		//A function to save the data to the SQL table on the psiturk server.  This gets called at the end of the file.
-		function save_data(data_table,data){
-			jsPsych.data.addProperties({stimulus: '', subject: psiturk.taskdata.get('workerId')});
-				$.ajax({
-			type:'post',
-				cache: false,
-				url: 'https://psiturk.psych.ucla.edu/~odegaard/sivaColorExperiment/templates/savedata.php',//'https://psiturk.psych.ucla.edu/~odegaard/summaryperceptionRealExp3/psiTurkProject/templates/savedata.php',
-						//Need to point this at the savedata.php in your own directory.  Why didn't this work locally???
-						data: {
-					table: data_table,
-						json: JSON.stringify(data),
-						//opt_data: {key: value}
-					},
-						success: function(output) { console.log(output); } // write the result to javascript console
-				});
+		if (psiTurkIsOn == true){
+		
+			//A function to save the data to the SQL table on the psiturk server.  This gets called at the end of the file.
+			function save_data(data_table,data){
+				jsPsych.data.addProperties({stimulus: '', subject: psiturk.taskdata.get('workerId')});
+					$.ajax({
+						type:'post',
+							cache: false,
+							url: 'https://psiturk.psych.ucla.edu/~odegaard/sivaColorExperiment/templates/savedata.php',//'https://psiturk.psych.ucla.edu/~odegaard/summaryperceptionRealExp3/psiTurkProject/templates/savedata.php',
+									//Need to point this at the savedata.php in your own directory.  Why didn't this work locally???
+									data: {
+								table: data_table,
+									json: JSON.stringify(data),
+									//opt_data: {key: value}
+								},
+									success: function(output) { console.log(output); } // write the result to javascript console
+					});
 			}
-		//*/
+		}
+		
 		var filename = "SivaTestResults.csv";
 
 		 /* load psiturk! */
-		var psiturk = new PsiTurk(uniqueId, adServerLoc, mode);
-		//[^^^Uncomment to test on psiturk]
+		if (psiTurkIsOn == true){
+			var psiturk = new PsiTurk(uniqueId, adServerLoc, mode);
+		}
 		
 		<!-- ---------------------------------- -->
 		//Canvas Parameters
@@ -176,7 +179,7 @@
 
 		//Trial Parameters
 		//(Per condition)
-		var numberOfTrials = 40;
+		var numberOfTrials = 1;
 
 		//Time between the trials (in ms)
 		var minPostTrialTime = 0;
@@ -219,6 +222,20 @@
 				return fixation_cross;
 		}
 		var fixation_cross = fixation_cross();
+		
+		function thankYou() {
+			cueContext.font = "bold 24px sans-serif";
+			cueContext.textAlign = "center";
+			cueContext.textBaseline = "middle";
+			cueContext.fillStyle = "black";
+			cueContext.fillText("The experiment has ended.", canvasWidth/2, canvasHeight/2 - 40);
+			cueContext.fillText("Thank you for participating in our experiment.", canvasWidth/2, canvasHeight/2 + 0);
+			cueContext.fillText("You may now exit the window.", canvasWidth/2, canvasHeight/2 + 40);
+			var thankYou = cueCanvas.toDataURL();
+			cueContext.clearRect(0, 0, canvas.width, canvas.height);
+			return thankYou;		
+		}
+		var thankYou = thankYou();
 		
 		//Function to draw canvas. Called by the stimuli objects
 		function drawCanvas(centerNum, peripheryNum, value, centerSat, periSat){
@@ -554,6 +571,14 @@
 			]
 		};
 		
+		var thankYou_block = {
+			type: 'single-stim',
+			choices: [32],
+			timeline: [
+				{stimulus: thankYou}
+			]
+		};
+		
 		//Commented out because probably not needed. Can delete if unnecessary.
 		/* 
 		var welcome_block = {
@@ -606,6 +631,7 @@
 			on_finish: function(data){
 				if(data.periSat == periSatCondition30 && data.key_press == peripheryKey.charCodeAt(0)){
 					counter30++;
+					alert("counter 30++ called");
 				}
 				else if (data.periSat == periSatCondition40 && data.key_press == peripheryKey.charCodeAt(0)){
 					counter40++;
@@ -625,15 +651,16 @@
 			},
 			//* [Delete if unneeded for reference]
 			on_finish: function(data){
-				var correct = false;
-				if (data.response == '2' && data.rt > -1){
-					correct = true;
+				var hasData = true;
+				
+				//record if trial was a response trial
+				//not presponse if key_press is spacebar or no response
+				if (data.key_press == '32' || data.key_press == -1){
+					hasData = false;
 				}
-				else if (data.response == '1' && data.rt == -1){
-					correct = true;
-				}
-				//Add data to the data object on whether response was correct
-				jsPsych.data.addDataToLastTrial({correct: correct});
+				//Add data to the data object on whether it was a response trial
+				jsPsych.data.addDataToLastTrial({isResponseTrial: hasData});
+			
 			},
 			//*/
 			//timeline for object is the randomized array of trials
@@ -701,7 +728,8 @@
 		//Might not be necessary anymore if we ask the screen question with a prompt from the browser
 		//timeline.push(screenQuestion_block);
 		timeline.push(test_block);
-		timeline.push(debrief_block);
+		//timeline.push(debrief_block);
+		timeline.push(thankYou_block);
 		
 		//De-Initialize the canvas
 		var canvas = document.getElementById("cueCanvas");
@@ -709,22 +737,22 @@
 		cueContext.canvas.width = 0;
 		cueContext.canvas.height = 0;
 		
-		//delete this line if unnecessary
-		//alert("\nScreen has loaded. Please scroll down.\n");
-		
 		//This is where the thing actually plays
 		jsPsych.init({
 			timeline: timeline,
 			on_trial_finish: function() {
-			//[Uncomment below to test on Psiturk]
-			/*
-				//SivaTest is the name of the table
-			 save_data('SivaTest', [jsPsych.data.getLastTrialData()]);
-			 //*/
-			 //console.log(jsPsych.data.getLastTrialData());
+				if (psiTurkIsOn == true){
+				
+					//SivaExpt1 is the name of the table
+					save_data('SivaExpt1', [jsPsych.data.getLastTrialData()]);
+				 
+					//console.log(jsPsych.data.getLastTrialData());
+				 }
 			},
 			on_finish: function(){
-				jsPsych.data.localSave(filename, 'csv');
+				if (savingLocally == true){
+					jsPsych.data.localSave(filename, 'csv');
+				}
 				jsPsych.data.displayData();
 				psiturk.saveData({
 			       	 	success: function() { psiturk.completeHIT(); }
