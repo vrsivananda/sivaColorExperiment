@@ -43,7 +43,7 @@
 	<script>
 	
 		//[Uncomment below to test on psiturk]
-		/*
+		//*
 		
 		//A function to save the data to the SQL table on the psiturk server.  This gets called at the end of the file.
 		function save_data(data_table,data){
@@ -65,7 +65,7 @@
 		var filename = "SivaTestResults.csv";
 
 		 /* load psiturk! */
-		//var psiturk = new PsiTurk(uniqueId, adServerLoc, mode);
+		var psiturk = new PsiTurk(uniqueId, adServerLoc, mode);
 		//[^^^Uncomment to test on psiturk]
 		
 		<!-- ---------------------------------- -->
@@ -198,9 +198,9 @@
 			cueContext.textAlign = "center";
 			cueContext.textBaseline = "middle";
 			cueContext.fillStyle = "black";
-			cueContext.fillText("Which cloud is more colorful?", canvasWidth/2, canvasHeight/2 + 150);
+			cueContext.fillText("Which cloud was more colorful?", canvasWidth/2, canvasHeight/2 + 150);
 			cueContext.fillText("Press " + centerKey + " if the center was more colorful.", canvasWidth/2, canvasHeight/2 + 200);
-			cueContext.fillText("Press " + peripheryKey + " if the periphery was more colorful", canvasWidth/2, canvasHeight/2 + 250);
+			cueContext.fillText("Press " + peripheryKey + " if the sides were more colorful", canvasWidth/2, canvasHeight/2 + 250);
 			var question1 = cueCanvas.toDataURL();
 			cueContext.clearRect(0, 0, canvas.width, canvas.height);
 			return question1;		
@@ -623,7 +623,7 @@
 					//console.log("no key_press, probably.");
 				}
 			},
-			/* [Delete if unneeded for reference]
+			//* [Delete if unneeded for reference]
 			on_finish: function(data){
 				var correct = false;
 				if (data.response == '2' && data.rt > -1){
@@ -635,7 +635,7 @@
 				//Add data to the data object on whether response was correct
 				jsPsych.data.addDataToLastTrial({correct: correct});
 			},
-			*/
+			//*/
 			//timeline for object is the randomized array of trials
 			//timeline: all_trials
 			timeline: randomizedTrialArray
@@ -703,7 +703,15 @@
 		timeline.push(test_block);
 		timeline.push(debrief_block);
 		
-		alert("\nScreen has loaded. Please scroll down.\n");
+		//De-Initialize the canvas
+		var canvas = document.getElementById("cueCanvas");
+		var cueContext = cueCanvas.getContext("2d");
+		cueContext.canvas.width = 0;
+		cueContext.canvas.height = 0;
+		
+		//delete this line if unnecessary
+		//alert("\nScreen has loaded. Please scroll down.\n");
+		
 		//This is where the thing actually plays
 		jsPsych.init({
 			timeline: timeline,
@@ -716,7 +724,7 @@
 			 //console.log(jsPsych.data.getLastTrialData());
 			},
 			on_finish: function(){
-				//jsPsych.data.localSave(filename, 'csv');
+				jsPsych.data.localSave(filename, 'csv');
 				jsPsych.data.displayData();
 				psiturk.saveData({
 			       	 	success: function() { psiturk.completeHIT(); }
