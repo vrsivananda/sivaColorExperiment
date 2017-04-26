@@ -41,8 +41,8 @@
 
 	</body>
 	<script>
-		var psiTurkIsOn = true;
-		var savingLocally = false;
+		var psiTurkIsOn = 1;
+		var savingLocally = 0;
 		
 		if (psiTurkIsOn == true){
 		
@@ -179,7 +179,7 @@
 
 		//Trial Parameters
 		//(Per condition)
-		var numberOfTrials = 1;
+		var numberOfTrials = 40;
 
 		//Time between the trials (in ms)
 		var minPostTrialTime = 0;
@@ -230,7 +230,7 @@
 			cueContext.fillStyle = "black";
 			cueContext.fillText("The experiment has ended.", canvasWidth/2, canvasHeight/2 - 40);
 			cueContext.fillText("Thank you for participating in our experiment.", canvasWidth/2, canvasHeight/2 + 0);
-			cueContext.fillText("You may now exit the window.", canvasWidth/2, canvasHeight/2 + 40);
+			cueContext.fillText("Press the spacebar to officially end the experiment.", canvasWidth/2, canvasHeight/2 + 40);
 			var thankYou = cueCanvas.toDataURL();
 			cueContext.clearRect(0, 0, canvas.width, canvas.height);
 			return thankYou;		
@@ -562,11 +562,11 @@
 			type: 'single-stim',
 			choices: [32],
 			timeline: [
-				{stimulus: 'Instructions1.png', timing_post_trial: 0},
-				{stimulus: 'Instructions2.png', timing_post_trial: 0},
-				{stimulus: 'Instructions3.png', timing_post_trial: 0},
-				{stimulus: 'Instructions4.png', timing_post_trial: 0},
-				{stimulus: 'Instructions5.png', timing_post_trial: 0},
+				{stimulus: '../static/images/Instructions1.png', timing_post_trial: 0},
+				{stimulus: '../static/images/Instructions2.png', timing_post_trial: 0},
+				{stimulus: '../static/images/Instructions3.png', timing_post_trial: 0},
+				{stimulus: '../static/images/Instructions4.png', timing_post_trial: 0},
+				{stimulus: '../static/images/Instructions5.png', timing_post_trial: 0},
 				
 			]
 		};
